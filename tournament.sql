@@ -6,6 +6,13 @@
 -- You can write comments in this file by starting them with two dashes, like
 -- these lines here.
 
+-- Create a new database named tournament
+CREATE DATABASE tournament;
+
+-- Connect to the database tournament
+\c tournament;
+
+-- Store a players table to save player and match data
 CREATE TABLE IF NOT EXISTS players (
     id serial PRIMARY KEY,
     name varchar(40) NOT NULL,
@@ -13,10 +20,4 @@ CREATE TABLE IF NOT EXISTS players (
     matches integer NOT NULL DEFAULT 0
 );
 
-
-CREATE TABLE IF NOT EXISTS matches (
-    id serial PRIMARY KEY,
-    player1 int NOT NULL,
-    player2 int
-);
 

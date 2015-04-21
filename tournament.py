@@ -11,45 +11,48 @@ def connect():
     return psycopg2.connect("dbname=tournament")
 
 
-def deleteMatches():
-    """Remove all the match records from the database."""
+def execute_query(query):
     conn = connect()
     c = conn.cursor()
-    c.execute('DELETE FROM matches')
+    c.execute(query)
     conn.commit()
+    return c
+
+
+def deleteMatches():
+    """Remove all the match records from the database."""
+    execute_query("UPDATE players SET matches = 0")
 
 
 def deletePlayers():
     """Remove all the player records from the database."""
-    conn = connect()
-    c = conn.cursor()
-    c.execute('DELETE FROM players')
-    conn.commit()
+    execute_query("DELETE FROM players")
 
 
 def countPlayers():
     """Returns the number of players currently registered."""
-    conn = connect()
-    c = conn.cursor()
-    c.execute('SELECT COUNT(*) FROM players')
-    return c.fetchone()[0]
+    result = execute_query("SELECT COUNT(*) FROM players").fetchone()[0]
+    return result
 
 
 def registerPlayer(name):
     """Adds a player to the tournament database.
-  
+
     The database assigns a unique serial id number for the player.  (This
     should be handled by your SQL database schema, not in your Python code.)
-  
+
     Args:
       name: the player's full name (need not be unique).
     """
+    # The first query of this one is a bit tricky, I couldn't seem to integrate
+    # the tuple c.execute(query, value) to my execute_query function
+    # so I used this lengthy way as a work around
     conn = connect()
     c = conn.cursor()
     query = "INSERT INTO players (name) values (%s)"
     c.execute(query, (name,))
     conn.commit()
-    c.execute('SELECT COUNT(*) FROM players')
+    c.execute("SELECT COUNT(*) FROM players")
     return c.fetchone()[0]
 
 
@@ -66,10 +69,8 @@ def playerStandings():
         wins: the number of matches the player has won
         matches: the number of matches the player has played
     """
-    conn = connect()
-    c = conn.cursor()
-    c.execute("SELECT * FROM players ORDER BY num_of_wins DESC")
-    return c.fetchall()
+    results = execute_query("SELECT * FROM players ORDER BY num_of_wins DESC")
+    return results.fetchall()
 
 
 def reportMatch(winner, loser):
@@ -79,15 +80,11 @@ def reportMatch(winner, loser):
       winner:  the id number of the player who won
       loser:  the id number of the player who lost
     """
-    conn = connect()
-    c = conn.cursor()
-    query_winner = 'UPDATE players SET num_of_wins = num_of_wins + 1, matches = matches + 1 WHERE id = %d' % winner
-    query_loser = 'UPDATE players SET matches = matches + 1 WHERE id = %d' % loser
+    query_winner = "UPDATE players SET num_of_wins = num_of_wins + 1, matches = matches + 1 WHERE id = %d" % winner
+    query_loser = "UPDATE players SET matches = matches + 1 WHERE id = %d" % loser
 
-    c.execute(query_winner)
-    c.execute(query_loser)
-
-    conn.commit()
+    execute_query(query_winner)
+    execute_query(query_loser)
 
  
 def swissPairings():
@@ -106,10 +103,7 @@ def swissPairings():
         name2: the second player's name
     """
 
-    conn = connect()
-    c = conn.cursor()
-    c.execute("SELECT * FROM players ORDER BY num_of_wins DESC")
-    players = c.fetchall()
+    players = execute_query("SELECT * FROM players ORDER BY num_of_wins DESC").fetchall()
     results = []
 
     for i in xrange(0, len(players) - 1, 2):

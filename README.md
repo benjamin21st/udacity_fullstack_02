@@ -17,15 +17,14 @@ Use root user access if necessary
 To set up the database, enter the PostegreSQL command line prompt
     >psql
 
-Then create a database called "tournament" by running the following command
-    >CREATE DATABASE tournament
-
-Check if the database has been successfully created by running:
-    >\d
-
 Load the "tournament.sql" file by running:
-    >USE tournament
     >\i tournament.sql
+
+This script will create a database named "tournament", use that database,
+and create a table named "players".
+
+Note: if you already have a tournament database or table "players" created, the script
+will skip creating database and execute the following command.
 
 
 ## Running the "tournament.py" script
