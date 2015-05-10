@@ -21,7 +21,7 @@ def execute_query(query):
 
 def deleteMatches():
     """Remove all the match records from the database."""
-    execute_query("UPDATE players SET matches = 0")
+    execute_query("DELETE FROM matches")
 
 
 def deletePlayers():
@@ -44,16 +44,11 @@ def registerPlayer(name):
     Args:
       name: the player's full name (need not be unique).
     """
-    # The first query of this one is a bit tricky, I couldn't seem to integrate
-    # the tuple c.execute(query, value) to my execute_query function
-    # so I used this lengthy way as a work around
     conn = connect()
     c = conn.cursor()
     query = "INSERT INTO players (name) values (%s)"
     c.execute(query, (name,))
     conn.commit()
-    c.execute("SELECT COUNT(*) FROM players")
-    return c.fetchone()[0]
 
 
 def playerStandings():
@@ -69,7 +64,10 @@ def playerStandings():
         wins: the number of matches the player has won
         matches: the number of matches the player has played
     """
-    results = execute_query("SELECT * FROM players ORDER BY num_of_wins DESC")
+
+    query = "SELECT * FROM standings"
+
+    results = execute_query(query)
     return results.fetchall()
 
 
@@ -80,11 +78,9 @@ def reportMatch(winner, loser):
       winner:  the id number of the player who won
       loser:  the id number of the player who lost
     """
-    query_winner = "UPDATE players SET num_of_wins = num_of_wins + 1, matches = matches + 1 WHERE id = %d" % winner
-    query_loser = "UPDATE players SET matches = matches + 1 WHERE id = %d" % loser
+    query = "INSERT INTO matches (winner, loser) VALUES (%d, %d)" % (winner, loser)
 
-    execute_query(query_winner)
-    execute_query(query_loser)
+    execute_query(query)
 
  
 def swissPairings():
@@ -103,15 +99,9 @@ def swissPairings():
         name2: the second player's name
     """
 
-    players = execute_query("SELECT * FROM players ORDER BY num_of_wins DESC").fetchall()
-    results = []
-
-    for i in xrange(0, len(players) - 1, 2):
-        pair = (players[i][0], players[i][1], players[i+1][0], players[i+1][1])
-        results.append(pair)
-        print results
-
-    return results
+    standings = playerStandings()
+    return [(standings[i][0], standings[i][1], standings[i+1][0], standings[i+1][1])
+            for i in range(0, len(standings), 2)]
 
 
 

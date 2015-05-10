@@ -20,8 +20,9 @@ To set up the database, enter the PostegreSQL command line prompt
 Load the "tournament.sql" file by running:
     >\i tournament.sql
 
-This script will create a database named "tournament", use that database,
-and create a table named "players".
+This script will drop database "tournament" if it already exists, so please make sure you have a
+backup of your "tournament" database; then it will create a new database named "tournament",
+connect to that database, and create a table named "players".
 
 Note: if you already have a tournament database or table "players" created, the script
 will skip creating database and execute the following command.
