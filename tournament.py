@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# 
+#
 # tournament.py -- implementation of a Swiss-system tournament
 #
 
@@ -62,8 +62,8 @@ def registerPlayer(name):
 def playerStandings():
     """Returns a list of the players and their win records, sorted by wins.
 
-    The first entry in the list should be the player in first place, or a player
-    tied for first place if there is currently a tie.
+    The first entry in the list should be the player in first place, or a
+    player tied for first place if there is currently a tie.
 
     Returns:
       A list of tuples, each of which contains (id, name, wins, matches):
@@ -88,19 +88,20 @@ def reportMatch(winner, loser):
       loser:  the id number of the player who lost
     """
     conn = connect()
-    query = "INSERT INTO matches (winner, loser) VALUES (%d, %d)" % (winner, loser)
+    query = "INSERT INTO matches (winner, loser) VALUES (%d, %d)" \
+            % (winner, loser)
     execute_query(conn, query)
     conn.close()
 
- 
+
 def swissPairings():
     """Returns a list of pairs of players for the next round of a match.
-  
+
     Assuming that there are an even number of players registered, each player
     appears exactly once in the pairings.  Each player is paired with another
     player with an equal or nearly-equal win record, that is, a player adjacent
     to him or her in the standings.
-  
+
     Returns:
       A list of tuples, each of which contains (id1, name1, id2, name2)
         id1: the first player's unique id
@@ -110,9 +111,6 @@ def swissPairings():
     """
 
     standings = playerStandings()
-    return [(standings[i][0], standings[i][1], standings[i+1][0], standings[i+1][1])
+    return [(standings[i][0], standings[i][1],
+            standings[i+1][0], standings[i+1][1])
             for i in range(0, len(standings), 2)]
-
-
-
-
